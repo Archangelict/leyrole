@@ -4,8 +4,16 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "allowJs": true,
-    "lib": ["ESNext"]
+    "lib": [
+      "ESNext"
+    ],
+    "noEmit": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
 }

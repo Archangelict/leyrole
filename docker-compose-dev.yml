@@ -1,0 +1,11 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "node"
+    working_dir: /app
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
