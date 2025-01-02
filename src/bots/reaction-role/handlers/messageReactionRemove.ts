@@ -11,6 +11,6 @@ module.exports = async (
     return;
   }
 
-  const manager = new ReactionRoleManager(messageReaction, user, config, true);
+  const manager = new ReactionRoleManager(messageReaction, user, config, false);
   manager.setRoles();
 };

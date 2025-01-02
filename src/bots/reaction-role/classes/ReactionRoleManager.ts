@@ -7,13 +7,20 @@ class ReactionRoleManager {
   config: Config;
   roleIds?: Snowflake[];
   member?: GuildMember;
+  added: boolean;
 
-  constructor(messageReaction: MessageReaction, user: User, config: Config) {
+  constructor(
+    messageReaction: MessageReaction,
+    user: User,
+    config: Config,
+    added: boolean,
+  ) {
     this.messageReaction = messageReaction;
     this.user = user;
     this.config = config;
     this.roleIds = undefined;
     this.member = undefined;
+    this.added = added;
   }
 
   get emoji(): string {
@@ -31,21 +38,42 @@ class ReactionRoleManager {
     }
 
     await this._handleUserReaction();
+    if (this.config.removeReaction) {
+      // override added if role exists
+      this.added = !this._memberHasEveryRoleInRoles();
+    }
 
     switch (this.config.policy) {
-      case "once":
-        return this._memberHasSomeRoleInRuleRoles()
-          ? undefined
-          : this._addRolesToMember();
       case "any":
-        return this._memberHasEveryRoleInRoles()
-          ? this._removeRolesFromMember()
-          : this._addRolesToMember();
-      case "unique":
+        if (this.added && !this._memberHasEveryRoleInRoles()) {
+          this._addRolesToMember();
+        } else if (!this.added && this._memberHasEveryRoleInRoles()) {
+          this._removeRolesFromMember();
+        }
+        break;
+      case "unique": // when using type unique, do not set remove to true
+        if (this.added && !this._memberHasEveryRoleInRoles()) {
+          try {
+            const userReactions =
+              this.messageReaction.message.reactions.cache.filter((reaction) =>
+                reaction.users.cache.has(this.user.id),
+              );
+            for (const reaction of userReactions.values()) {
+              if (reaction.emoji.name !== this.emoji) {
+                await reaction.users.remove(this.user.id);
+                this._removeRolesFromMember();
+                break;
+              }
+            }
+          } catch {
+            // Do nothing, since nothing can be done
+          }
+          this._setRolesToMember();
+        } else if (!this.added && this._memberHasEveryRoleInRoles()) {
+          this._removeRolesFromMember();
+        }
+        break;
       default:
-        return this._memberHasEveryRoleInRoles()
-          ? this._removeRolesFromMember()
-          : this._setRolesToMember();
     }
   }
 
@@ -83,12 +111,6 @@ class ReactionRoleManager {
     if (this.config.removeReaction) {
       this.messageReaction.users.remove(this.user);
     }
-  }
-
-  private _memberHasSomeRoleInRuleRoles(): boolean {
-    return this.ruleRoleIds.some((roleId) =>
-      (this.member as GuildMember).roles.cache.has(roleId),
-    );
   }
 
   private _memberHasEveryRoleInRoles(): boolean {
