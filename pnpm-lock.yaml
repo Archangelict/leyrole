@@ -8,15 +8,6 @@ importers:
 
   .:
     dependencies:
-      discord-bot-core-client:
-        specifier: ^0.0.5
-        version: 0.0.5
-      discord.js:
-        specifier: ^13.0.1
-        version: 13.17.1
-      dotenv:
-        specifier: ^16.4.7
-        version: 16.4.7
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -42,6 +33,15 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.19.0
         version: 8.19.0(eslint@9.17.0)(typescript@5.7.2)
+      discord-bot-core-client:
+        specifier: ^0.0.5
+        version: 0.0.5
+      discord.js:
+        specifier: ^13.0.1
+        version: 13.17.1
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       esbuild:
         specifier: ^0.24.2
         version: 0.24.2
