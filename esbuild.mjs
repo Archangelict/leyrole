@@ -23,7 +23,7 @@ for (const bot of fs.readdirSync("src/bots")) {
     // eslint-disable-next-line no-undef
     minify: (process.env.ESBUILD_MINIFY ?? "") !== "",
   });
-  for (const file of fs.globSync("src/bots/" + bot + "/**/*.json")) {
+  for (const file of fs.globSync("src/bots/" + bot + "/**/*.{json,yaml,yml}")) {
     fs.copyFileSync(file, "dist/bots/" + bot + "/" + basename(file));
   }
 }
