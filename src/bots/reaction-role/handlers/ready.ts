@@ -1,6 +1,12 @@
 import { BaseGuildTextChannel, Client } from "discord.js";
-import configs from "../config.json";
+import { load } from "js-yaml";
+import fs from "fs";
 import path from "path";
+import { type Config } from "../types";
+
+const configs = load(
+  fs.readFileSync(__dirname + "/../config.yaml", "utf8"),
+) as Config[];
 
 module.exports = async (client: Client): Promise<void> => {
   console.log(__dirname.split(path.sep).slice(-2)[0]);
@@ -14,9 +20,10 @@ module.exports = async (client: Client): Promise<void> => {
     const message = await (channel as BaseGuildTextChannel).messages.fetch(
       config.messageId,
     );
-
-    Object.keys(config.emojiRoleMap).forEach(
-      async (emoji) => await message.react(emoji),
-    );
+    for (const emoji of Object.keys(config.emojiRoleMap)) {
+      await message.react(emoji);
+    }
   }
+
+  console.log("reaction-role ready");
 };

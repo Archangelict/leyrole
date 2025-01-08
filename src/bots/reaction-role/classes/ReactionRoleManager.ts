@@ -46,9 +46,9 @@ class ReactionRoleManager {
     switch (this.config.policy) {
       case "any":
         if (this.added && !this._memberHasEveryRoleInRoles()) {
-          this._addRolesToMember();
+          await this._addRolesToMember();
         } else if (!this.added && this._memberHasEveryRoleInRoles()) {
-          this._removeRolesFromMember();
+          await this._removeRolesFromMember();
         }
         break;
       case "unique": // when using type unique, do not set remove to true
@@ -59,18 +59,23 @@ class ReactionRoleManager {
                 reaction.users.cache.has(this.user.id),
               );
             for (const reaction of userReactions.values()) {
-              if (reaction.emoji.name !== this.emoji) {
-                await reaction.users.remove(this.user.id);
-                this._removeRolesFromMember();
-                break;
+              if (
+                reaction.emoji.id === this.emoji ||
+                reaction.emoji.name === this.emoji
+              ) {
+                continue;
               }
+
+              await reaction.users.remove(this.user.id);
+              await this._removeRolesFromMember();
+              break;
             }
           } catch {
             // Do nothing, since nothing can be done
           }
-          this._setRolesToMember();
+          await this._setRolesToMember();
         } else if (!this.added && this._memberHasEveryRoleInRoles()) {
-          this._removeRolesFromMember();
+          await this._removeRolesFromMember();
         }
         break;
       default:
@@ -109,7 +114,7 @@ class ReactionRoleManager {
 
   private async _handleUserReaction(): Promise<void> {
     if (this.config.removeReaction) {
-      this.messageReaction.users.remove(this.user);
+      await this.messageReaction.users.remove(this.user);
     }
   }
 
@@ -120,11 +125,13 @@ class ReactionRoleManager {
   }
 
   private async _removeRolesFromMember(): Promise<void> {
-    (this.member as GuildMember).roles.remove(this.roleIds as Snowflake[]);
+    await (this.member as GuildMember).roles.remove(
+      this.roleIds as Snowflake[],
+    );
   }
 
   private async _addRolesToMember(): Promise<void> {
-    (this.member as GuildMember).roles.add(this.roleIds as Snowflake[]);
+    await (this.member as GuildMember).roles.add(this.roleIds as Snowflake[]);
   }
 
   private async _setRolesToMember(): Promise<void> {
@@ -136,7 +143,7 @@ class ReactionRoleManager {
       ...(this.roleIds as Snowflake[]),
     ];
 
-    (this.member as GuildMember).roles.set(roleIdsToSet);
+    await (this.member as GuildMember).roles.set(roleIdsToSet);
   }
 }
 

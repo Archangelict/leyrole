@@ -1,8 +1,10 @@
 import { Message } from "discord.js";
-import jsYaml from "js-yaml";
+import { load } from "js-yaml";
 import { Config } from "../types";
-
-const configs = jsYaml.load("../config.yaml") as Config[];
+import fs from "fs";
+const configs = load(
+  fs.readFileSync(__dirname + "/../config.yaml", "utf8"),
+) as Config[];
 
 const configMap = new Map();
 configs.forEach((config) => {
